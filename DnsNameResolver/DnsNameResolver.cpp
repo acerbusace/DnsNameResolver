@@ -14,7 +14,7 @@
 // DWORD = ULONG = uint in Windows
 typedef void (WINAPI* Callback) (DNS_STATUS, PSTR, DWORD);
 void WINAPI DnsQueryCompletionRoutine(PVOID, PDNS_QUERY_RESULT);
-extern "C" __declspec(dllexport) void WINAPI ResolveDns(PCWSTR, WORD, Callback callback);
+extern "C" __declspec(dllexport) void WINAPI ResolveDnsName(PCWSTR, WORD, Callback callback);
 
 typedef struct _DNS_QUERY_CONTEXT {
 	WORD QueryType;
@@ -23,26 +23,23 @@ typedef struct _DNS_QUERY_CONTEXT {
 	DNS_QUERY_CANCEL DnsCancelHandle;
 } DNS_QUERY_CONTEXT, *PDNS_QUERY_CONTEXT;
 
-void WINAPI dummy(DNS_STATUS dnsStatus, PWSTR ipAddress, DWORD ttl) {
-	std::wcout << "ReturnCallBack: DNS_STATUS: " << dnsStatus << " | IP: " << ipAddress << " | TTL: " << ttl << std::endl;
+void WINAPI TestCallback(DNS_STATUS dnsStatus, PSTR ipAddress, DWORD ttl) {
+	std::cout <<  "TestCallback: dnsStatus: " << dnsStatus << " | ipAddress: " << ipAddress << " | ttl: " << ttl << std::endl;
 }
 
-/*int main() {
-	std::cout << "--- BEGIN ---" << std::endl;
+int main() {
+	ResolveDnsName(L"www.bing.com", DNS_TYPE_A, TestCallback);
 
-	ResolveDns(L"www.bing.com", DNS_TYPE_A, dummy);
-
-	while (1) {
-		Sleep(100);
-	}
-
-	std::cout << "--- END ---" << std::endl;
+	std::cin.get();
 	return 0;
-}*/
+}
 
-void WINAPI ResolveDns(PCWSTR pDnsName, WORD queryType, Callback callback) {
-	std::cout << "--- ResolveDns : BEGIN ---" << std::endl;
-
+/* Resolves given Dns Name.
+ * pDnsName: Dns Name.
+ * queryType: Type of records to query for. Currently A and AAAA records are supported.
+ * callback: Function to callback when request completes.
+*/
+void WINAPI ResolveDnsName(PCWSTR pDnsName, WORD queryType, Callback callback) {
 	PDNS_QUERY_CONTEXT pDnsQueryContext = new DNS_QUERY_CONTEXT();
 	pDnsQueryContext->QueryType = queryType;
 	pDnsQueryContext->QueryResult.Version = DNS_QUERY_REQUEST_VERSION1;
@@ -60,18 +57,17 @@ void WINAPI ResolveDns(PCWSTR pDnsName, WORD queryType, Callback callback) {
 
 	DNS_STATUS DnsStatus = DnsQueryEx(&DnsQueryRequest, &pDnsQueryContext->QueryResult, &pDnsQueryContext->DnsCancelHandle);
 
-	WCHAR ran[128];
 	if (DnsStatus != DNS_REQUEST_PENDING) {
-		std::cout << "--- ResolveDns : SYNC ---" << std::endl;
 		pDnsQueryContext->QueryResult.QueryStatus = DnsStatus;
 		DnsQueryCompletionRoutine(pDnsQueryContext, &pDnsQueryContext->QueryResult);
 	}
-
-	std::cout << "--- ResolveDns : END ---" << std::endl;
 }
 
+/* Callback function for DnsQueryEx.
+ * pQueryContext: Dns query context. Contains, record type, user callback and cancel handle.
+ * pQueryResults: Results of DnsQueryEx. Contains records pointers and dns status code.
+*/
 void WINAPI DnsQueryCompletionRoutine(PVOID pQueryContext, PDNS_QUERY_RESULT pQueryResults) {
-	std::cout << "--- DnsQueryCompletionRoutine : BEGIN ---" << std::endl;
 	PDNS_QUERY_CONTEXT pDnsQueryContext = (PDNS_QUERY_CONTEXT)pQueryContext;
 
 	//PCWSTR ret = NULL;
@@ -80,7 +76,7 @@ void WINAPI DnsQueryCompletionRoutine(PVOID pQueryContext, PDNS_QUERY_RESULT pQu
 	CHAR ipAddress[128];
 
 	if (pQueryResults->QueryStatus != ERROR_SUCCESS) {
-		std::cout << "Error occured: " << pQueryResults->QueryStatus << std::endl;
+		pDnsQueryContext->Callback(pQueryResults->QueryStatus, ipAddress, 0);
 		goto exit;
 	}
 
@@ -103,16 +99,12 @@ void WINAPI DnsQueryCompletionRoutine(PVOID pQueryContext, PDNS_QUERY_RESULT pQu
 		}
 
 		if (p->wType == DNS_TYPE_A || p->wType == DNS_TYPE_AAAA) {
-			std::cout << "--- DnsQueryCompletionRoutine : Callback B ---" << std::endl;
-
 			pDnsQueryContext->Callback(
 				ret == NULL ? WSAGetLastError() : pQueryResults->QueryStatus,
 				ipAddress,
 				//"Hello World",
 				p->dwTtl
 			);
-
-			std::cout << "--- DnsQueryCompletionRoutine : Callback E ---" << std::endl;
 
 			goto exit;
 		}
@@ -121,11 +113,9 @@ void WINAPI DnsQueryCompletionRoutine(PVOID pQueryContext, PDNS_QUERY_RESULT pQu
 	pDnsQueryContext->Callback(ERROR_NOT_FOUND, ipAddress, 0);
 
 	exit:
-	std::cout << "--- DnsQueryCompletionRoutine : EXIT ---" << std::endl;
 	if (pQueryResults->pQueryRecords) {
 		DnsRecordListFree(pQueryResults->pQueryRecords, DnsFreeRecordList);
 	}
 
 	delete pDnsQueryContext;
-	std::cout << "--- DnsQueryCompletionRoutine : END ---" << std::endl;
 }

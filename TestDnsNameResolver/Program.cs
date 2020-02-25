@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TestDnsResolver
+namespace TestDnsNameResolver
 {
     class Program
     {
@@ -48,7 +48,7 @@ namespace TestDnsResolver
 
         // You can get the entry point by using VS Command Prompt
         // > dumpbin /exports DnsResolver.dll
-        [DllImport("DnsResolver.dll", EntryPoint = @"_ResolveDns@12", CharSet = CharSet.Unicode, ExactSpelling = true, CallingConvention = CallingConvention.StdCall)]
+        [DllImport("DnsNameResolver.dll", EntryPoint = @"ResolveDnsName", CharSet = CharSet.Unicode, ExactSpelling = true, CallingConvention = CallingConvention.StdCall)]
         internal static extern void ResolveDns(string hostname, DnsRecordTypes type, CallbackDelegate callback);
     }
 }

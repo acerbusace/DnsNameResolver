@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("TestDnsResolver")]
+[assembly: AssemblyTitle("TestDnsNameResolver")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("TestDnsResolver")]
+[assembly: AssemblyProduct("TestDnsNameResolver")]
 [assembly: AssemblyCopyright("Copyright ©  2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("0806228f-c621-4d90-846a-237a8ff10274")]
+[assembly: Guid("da5a5864-4d60-4264-844a-f1eba6b7b8e7")]
 
 // Version information for an assembly consists of the following four values:
 //
