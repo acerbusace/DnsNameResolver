@@ -13,6 +13,12 @@ namespace TestDnsNameResolver
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate void CallbackDelegate(int status, string ipAddress, uint ttl);
 
+        public enum DnsRecordTypes: ushort
+        {
+            DNS_TYPE_A = 0x0001,
+            DNS_TYPE_AAAA = 0x001c,
+        }
+
         static async Task Main(string[] args)
         {
             var result = await GetHostAddressAsync("www.bing.com").ConfigureAwait(false);
@@ -38,12 +44,6 @@ namespace TestDnsNameResolver
 
             ResolveDns(hostname, type, callback);
             return await taskWrapper.Task;
-        }
-
-        public enum DnsRecordTypes: ushort
-        {
-            DNS_TYPE_A = 0x0001,
-            DNS_TYPE_AAAA = 0x001c,
         }
 
         // You can get the entry point by using VS Command Prompt

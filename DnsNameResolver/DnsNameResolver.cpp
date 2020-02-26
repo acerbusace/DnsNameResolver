@@ -23,7 +23,7 @@ typedef struct _DNS_QUERY_CONTEXT {
 	DNS_QUERY_CANCEL DnsCancelHandle;
 } DNS_QUERY_CONTEXT, *PDNS_QUERY_CONTEXT;
 
-void WINAPI TestCallback(DNS_STATUS dnsStatus, PSTR ipAddress, DWORD ttl) {
+/*void WINAPI TestCallback(DNS_STATUS dnsStatus, PSTR ipAddress, DWORD ttl) {
 	std::cout <<  "TestCallback: dnsStatus: " << dnsStatus << " | ipAddress: " << ipAddress << " | ttl: " << ttl << std::endl;
 }
 
@@ -32,7 +32,7 @@ int main() {
 
 	std::cin.get();
 	return 0;
-}
+}*/
 
 /* Resolves given Dns Name.
  * pDnsName: Dns Name.
@@ -76,7 +76,9 @@ void WINAPI DnsQueryCompletionRoutine(PVOID pQueryContext, PDNS_QUERY_RESULT pQu
 	CHAR ipAddress[128];
 
 	if (pQueryResults->QueryStatus != ERROR_SUCCESS) {
-		pDnsQueryContext->Callback(pQueryResults->QueryStatus, ipAddress, 0);
+		try {
+			pDnsQueryContext->Callback(pQueryResults->QueryStatus, ipAddress, 0);
+		} catch (...) { }
 		goto exit;
 	}
 
@@ -99,18 +101,20 @@ void WINAPI DnsQueryCompletionRoutine(PVOID pQueryContext, PDNS_QUERY_RESULT pQu
 		}
 
 		if (p->wType == DNS_TYPE_A || p->wType == DNS_TYPE_AAAA) {
-			pDnsQueryContext->Callback(
-				ret == NULL ? WSAGetLastError() : pQueryResults->QueryStatus,
-				ipAddress,
-				//"Hello World",
-				p->dwTtl
-			);
+			try {
+				pDnsQueryContext->Callback(
+					ret == NULL ? WSAGetLastError() : pQueryResults->QueryStatus,
+					ipAddress,
+					p->dwTtl);
+			} catch (...) { }
 
 			goto exit;
 		}
 	}
 
-	pDnsQueryContext->Callback(ERROR_NOT_FOUND, ipAddress, 0);
+	try {
+		pDnsQueryContext->Callback(ERROR_NOT_FOUND, ipAddress, 0);
+	} catch (...) { }
 
 	exit:
 	if (pQueryResults->pQueryRecords) {
