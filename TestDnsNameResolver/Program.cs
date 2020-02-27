@@ -42,13 +42,13 @@ namespace TestDnsNameResolver
                     taskWrapper.SetResult(Tuple.Create(ipAddress, ttl));
                 });
 
-            ResolveDns(hostname, type, callback);
+            ResolveDnsName(hostname, type, callback);
             return await taskWrapper.Task;
         }
 
         // You can get the entry point by using VS Command Prompt
         // > dumpbin /exports DnsResolver.dll
         [DllImport("DnsNameResolver.dll", EntryPoint = @"ResolveDnsName", CharSet = CharSet.Unicode, ExactSpelling = true, CallingConvention = CallingConvention.StdCall)]
-        internal static extern void ResolveDns(string hostname, DnsRecordTypes type, CallbackDelegate callback);
+        internal static extern void ResolveDnsName(string hostname, DnsRecordTypes type, CallbackDelegate callback);
     }
 }
