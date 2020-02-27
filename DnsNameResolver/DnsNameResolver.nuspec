@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>DnsNameResolver</id>
-        <version>1.0</version>
+        <version>1.0.1</version>
         <description>Native C++ wrapper for DnsQueryEx.</description>
         <authors>Alexkumar Patel</authors>
         <tags>native C++ dns</tags>
